@@ -1,0 +1,34 @@
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager;
+@page "/pay"
+
+<p>@result</p>
+<EditForm Model=@MA OnValidSubmit="Finish">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>FullName: </label><br>
+    <InputText @bind-Value="MA.Name" /><br>
+    <label>Email: </label><br>
+    <InputText @bind-Value="MA.Email" /><br>
+    <label>Address: </label><br>
+    <InputText @bind-Value="MA.Adress" /><br>
+    <label>Phone Number: </label><br>
+    <InputText @bind-Value="MA.PhoneNumber" /><br><br>
+    <button class="btn btn-dark" type="submit">Submit</button>
+</EditForm>
+
+@code
+{
+    public string result;
+    public static string BaseUrl = "https://d99521073.herokuapp.com/";
+    public static HttpClient Client = new HttpClient();
+    public async void Finish()
+    {
+        var answer = await Client.PutAsJsonAsync(BaseUrl+"Shirt/BuyShirts", MyCart.CartShirtIds.ToArray());
+        var answer2 = await Client.PutAsJsonAsync(BaseUrl + "Pants/BuyPants", MyCart.CartPantsIds.ToArray());
+        MyCart.CartShirtIds.Clear();
+        MyCart.CartPantsIds.Clear();
+        NavigationManager.NavigateTo("finish");
+    }
+    Account MA = new Account();
+}

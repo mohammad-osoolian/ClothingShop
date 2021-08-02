@@ -1,0 +1,134 @@
+@page "/admin"
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager;
+
+@* @inject HttpClient Client *@
+@if (Alret)
+{
+    <div class="alert alert-danger" role="alert">Not Available</div>
+}
+<h1>Admin Panel</h1>
+<div style="float: left; margin-left:20px; padding: 5px; border:solid black 2px">
+    <h3>Shirt Panel</h3>
+    <EditForm Model=@ShirtModel OnValidSubmit="UpdateShirtDatabase">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Name: </label><br>
+        <InputText @bind-Value="ShirtModel.Name" /><br>
+        <label>Size: </label><br>
+        <InputText @bind-Value="ShirtModel.Size" /><br>
+        <label>Price: </label><br>
+        <InputNumber @bind-Value="ShirtModel.Price" /><br>
+        <label>Number: </label><br>
+        <InputNumber @bind-Value="ShirtModel.Number" /><br>
+        <label>Image: </label><br>
+        <InputText @bind-Value="ShirtModel.Image" /><br>
+        <label>Id: </label><br>
+        <InputNumber @bind-Value="ShirtModel.Id" /><br><br>
+        <button class="btn btn-dark" type="submit">Add/Edit</button>
+    </EditForm>
+</div>
+<div style="float: left; margin-left:20px; padding: 5px; border:solid black 2px">
+    <h3>Pants Panel</h3>
+    <EditForm Model=@PantsModel OnValidSubmit="UpdatePantsDatabase">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label>Name: </label><br>
+        <InputText @bind-Value="PantsModel.Name" /><br>
+        <label>Size: </label><br>
+        <InputText @bind-Value="PantsModel.Size" /><br>
+        <label>Price: </label><br>
+        <InputNumber @bind-Value="PantsModel.Price" /><br>
+        <label>Number: </label><br>
+        <InputNumber @bind-Value="PantsModel.Number" /><br>
+        <label>Image: </label><br>
+        <InputText @bind-Value="PantsModel.Image" /><br>
+        <label>Id: </label><br>
+        <InputNumber @bind-Value="PantsModel.Id" /><br><br>
+        <button class="btn btn-dark" type="submit">Add/Edit</button>
+    </EditForm>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+@if (Shirts != null)
+{
+    @foreach (Shirt shirt in Shirts)
+    {
+        <div class="product">
+        <img src=@(shirt.Image) height="300" width="232"/>
+        <p style="margin: 0px;">@shirt.Name @shirt.Size</p>
+        <p style="margin: 0px;">left in stuck: @shirt.Number id: @shirt.Id</p>
+
+        <button class="btn-danger" @onclick="()=>DeleteShirt(shirt.Id)">Delete</button>
+        <button class="btn-warning" @onclick="()=>EditShirt(shirt)">Edit</button>
+        </div>
+    }
+}
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+@if (Pants != null)
+{
+    @foreach (Pants pants in Pants)
+    {
+        <div class="product">
+        <img src=@(pants.Image) height="300" width="232"/>
+        <p style="margin: 0px;">@pants.Name @pants.Size</p>
+        <p style="margin: 0px;">left in stuck: @pants.Number id: @pants.Id</p>
+        <button class="btn-danger" @onclick="()=>DeletePants(pants.Id)">Delete</button>
+        <button class="btn-warning" @onclick="()=>EditPants(pants)">Edit</button>
+        </div>
+    }
+}
+
+@code
+{
+    public Shirt ShirtModel = new Shirt();
+    public Pants PantsModel = new Pants();
+    public bool Alret=false;
+    public static string BaseUrl = "https://d99521073.herokuapp.com/";
+    public static List<Shirt> Shirts{get;set;}
+    public static List<Pants> Pants{get;set;}
+
+    HttpClient Client = new HttpClient();
+    protected override async Task OnInitializedAsync()
+    {
+        Shirts = await Client.GetFromJsonAsync<List<Shirt>>(BaseUrl + "Shirt/GetAllShirts");
+        Pants = await Client.GetFromJsonAsync<List<Pants>>(BaseUrl + "Pants/GetAllPants");
+    }
+    public async void DeletePants(int pantsid)
+    {
+        await Client.DeleteAsync(BaseUrl+$"Pants/DeletePants?id={pantsid}").ContinueWith((task)=>NavigationManager.NavigateTo("admin",forceLoad:true));
+    }
+    public async void UpdatePantsDatabase()
+    {
+        if (!Pants.Select(p=>p.Id).Contains(PantsModel.Id))
+            await Client.PostAsJsonAsync<Pants>(BaseUrl+"Pants/AddNewPants", PantsModel).ContinueWith((task)=>NavigationManager.NavigateTo("admin",forceLoad:true));
+        else if(Pants.Select(p=>p.Id).Contains(PantsModel.Id))
+            await Client.PutAsJsonAsync<Pants>(BaseUrl+"Pants/UpdatePants", PantsModel).ContinueWith((task)=>NavigationManager.NavigateTo("admin",forceLoad:true));
+        PantsModel = new Pants();
+    }
+    public void EditPants(Pants pants)
+    {
+        PantsModel.Id = pants.Id;
+        PantsModel.SetValues(pants);
+        JsRuntime.InvokeAsync<bool>("scrollTo",0,0);
+    }
+
+
+    public async void DeleteShirt(int shirtid)
+    {
+        await Client.DeleteAsync(BaseUrl+$"Shirt/DeleteShirt?id={shirtid}").ContinueWith((task)=>NavigationManager.NavigateTo("admin",forceLoad:true));
+    }
+    public async void UpdateShirtDatabase()
+    {
+        if (!Shirts.Select(s=>s.Id).Contains(ShirtModel.Id))
+            await Client.PostAsJsonAsync<Shirt>(BaseUrl+"Shirt/AddNewShirt", ShirtModel).ContinueWith((task)=>NavigationManager.NavigateTo("admin",forceLoad:true));
+        else if(Shirts.Select(p=>p.Id).Contains(ShirtModel.Id))
+            await Client.PutAsJsonAsync<Shirt>(BaseUrl+"Shirt/UpdateShirt", ShirtModel).ContinueWith((task)=>NavigationManager.NavigateTo("admin",forceLoad:true));
+        ShirtModel = new Shirt();
+    }
+    public void EditShirt(Shirt shirt)
+    {
+        ShirtModel.Id = shirt.Id;
+        ShirtModel.SetValues(shirt);
+        JsRuntime.InvokeAsync<bool>("scrollTo",0,0);
+    }
+}

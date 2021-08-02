@@ -1,0 +1,28 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+
+        <div class="top-row px-4">
+            
+            <a href="/home" style="text-decoration: none; width: 50px; color: black; margin-right: 1000px">
+                <span class="oi oi-home" style="font-size:40px; margin-right: 20px; margin-top: 0px; float:left"></span>
+            </a>
+            <a href="/cart" style="text-decoration: none; width: 150px; color: black">
+                <span class="oi oi-cart" style="font-size:40px; margin-right: 20px; margin-top: 0px; float:left"></span>
+                <div>
+                    <p style="margin-bottom: 0px; float: left; margin-top: 1px;"></p>@*<span class="oi oi-dollar"/>*@
+                    @* <p style="margin-bottom: 0px; float: left;">See & Buy</p> *@
+                </div>
+            </a>
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>

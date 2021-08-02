@@ -1,0 +1,21 @@
+@inject NavigationManager NavigationManager;
+@page "/adminlogin"
+
+<EditForm Model=@admin OnValidSubmit="NavToAdmin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>Username: </label><br>
+    <InputText @bind-Value="admin.Username" /><br>
+    <label>Password: </label><br>
+    <InputText @bind-Value="admin.Password" /><br><br>
+    <button class="btn btn-dark" type="submit">Submit</button>
+</EditForm>
+
+@code
+{
+    public Admin admin = new Admin();
+    public void NavToAdmin()
+    {
+        NavigationManager.NavigateTo("admin");
+    }
+}

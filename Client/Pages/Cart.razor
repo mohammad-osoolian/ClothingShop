@@ -1,0 +1,83 @@
+@page "/cart"
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Image</th>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Number</th>
+            <th>Total Price</th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var shirt in CartShirts)
+            {
+                <tr>
+                    <td>
+                        <img src=@(shirt.Image) height="150" width="115"/>
+                    </td>
+                    <td>
+                        <p>@shirt.Name</p>
+                    </td>
+                    <td>
+                        <p>@shirt.Size</p>
+                    </td>
+                    <td>
+                        @shirt.Price $
+                    </td>
+                    <td>
+                        @(MyCart.CartShirtIds.Count(id=>id==shirt.Id))
+                    </td>
+                    <td>
+                        @(shirt.Price* MyCart.CartShirtIds.Count(id=>id==shirt.Id)) $
+                    </td>
+                </tr>
+            }
+            @foreach (var pants in CartPants)
+            {
+                <tr>
+                    <td>
+                        <img src=@(pants.Image) height="150" width="115"/>
+                    </td>
+                    <td>
+                        <p>@pants.Name</p>
+                    </td>
+                    <td>
+                        <p>@pants.Size</p>
+                    </td>
+                    <td>
+                        @pants.Price $
+                    </td>
+                    <td>
+                        @(MyCart.CartPantsIds.Count(id=>id==pants.Id))
+                    </td>
+                    <td>
+                        @(pants.Price* MyCart.CartPantsIds.Count(id=>id==pants.Id)) $
+                    </td>
+                </tr>
+            }
+        </tbody>
+</table>
+<p>Total Cart Price: @TotalPrice</p><a class="btn btn-primary" href="/pay" role="button" style="width: 100px; height: 50px;">Pay</a>
+
+@code
+{
+    public int TotalPrice{get;set;} = 0;
+    public static string BaseUrl = "https://d99521073.herokuapp.com/";
+    public static List<Shirt> Shirts{get;set;}
+    public static List<Pants> Pants{get;set;}
+    public List<Shirt> CartShirts = new List<Shirt>();
+    public List<Pants> CartPants = new List<Pants>();
+
+    HttpClient Client = new HttpClient();
+    protected override async Task OnInitializedAsync()
+    {
+        Shirts = await Client.GetFromJsonAsync<List<Shirt>>(BaseUrl + "Shirt/GetAllShirts");
+        CartShirts = MyCart.CartShirtIds.GroupBy(id=>id).Select(g=>g.Key).Select(id=>Shirts.Find(shirt=>shirt.Id == id)).ToList();
+        Pants = await Client.GetFromJsonAsync<List<Pants>>(BaseUrl + "Pants/GetAllPants");
+        CartPants = MyCart.CartPantsIds.GroupBy(id=>id).Select(g=>g.Key).Select(id=>Pants.Find(pants=>pants.Id == id)).ToList();
+        MyCart.CartShirtIds.ForEach(id=>TotalPrice += Shirts.Find(shirt=>shirt.Id==id).Price);
+        MyCart.CartPantsIds.ForEach(id=>TotalPrice += Pants.Find(pants=>pants.Id==id).Price);
+    }
+}
